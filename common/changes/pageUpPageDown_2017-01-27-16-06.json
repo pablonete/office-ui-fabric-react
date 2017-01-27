@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "office-ui-fabric-react",
+      "comment": "FocusZone: Support PgUp and PgDn keys.",
+      "type": "patch"
+    }
+  ],
+  "email": "v-panu@microsoft.com"
+}
