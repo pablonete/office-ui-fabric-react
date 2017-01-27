@@ -109,7 +109,7 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
         onKeyDown={ this._onKeyDown }
         onFocus={ this._onFocus }
         { ...{ onMouseDownCapture: this._onMouseDown } }
-        >
+      >
         { this.props.children }
       </div>
     );
@@ -274,6 +274,18 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
           }
           return;
 
+        case KeyCodes.pageUp:
+          if (direction !== FocusZoneDirection.horizontal && this._moveFocusPageUp()) {
+            break;
+          }
+          return;
+
+        case KeyCodes.pageDown:
+          if (direction !== FocusZoneDirection.horizontal && this._moveFocusPageDown()) {
+            break;
+          }
+          return;
+
         case KeyCodes.home:
           const firstChild = this.refs.root.firstChild as HTMLElement;
           if (this.focusElement(getNextElement(this.refs.root, firstChild, true))) {
@@ -354,13 +366,13 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
   private _moveFocus(
     isForward: boolean,
     getDistanceFromCenter: (activeRect: ClientRect, targetRect: ClientRect) => number,
-    ev?: Event): boolean {
+    isSequential: boolean = this.props.direction !== FocusZoneDirection.bidirectional,
+  ): boolean {
 
     let element = this._activeElement;
     let candidateDistance = -1;
     let candidateElement: HTMLElement;
     let changedFocus = false;
-    let isBidirectional = this.props.direction === FocusZoneDirection.bidirectional;
 
     if (!element) {
       return false;
@@ -372,14 +384,17 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
       }
     }
 
-    const activeRect = isBidirectional ? element.getBoundingClientRect() : null;
+    const activeRect = !isSequential && element.getBoundingClientRect();
 
     do {
       element = isForward ?
         getNextElement(this.refs.root, element) :
         getPreviousElement(this.refs.root, element);
 
-      if (isBidirectional) {
+      if (isSequential) {
+        candidateElement = element;
+        break;
+      } else {
         if (element) {
           const targetRect = element.getBoundingClientRect();
           const elementDistance = getDistanceFromCenter(activeRect, targetRect);
@@ -393,9 +408,6 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
             break;
           }
         }
-      } else {
-        candidateElement = element;
-        break;
       }
 
     } while (element);
@@ -473,6 +485,55 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
 
       return distance;
     })) {
+      this._setFocusAlignment(this._activeElement, false, true);
+      return true;
+    }
+
+    return false;
+  }
+
+  private _moveFocusPageDown(): boolean {
+    return this._moveFocusGap(this._getPageHeight());
+  }
+
+  private _moveFocusPageUp(): boolean {
+    return this._moveFocusGap(-this._getPageHeight());
+  }
+
+  private _getPageHeight(): number {
+    if (!window) {
+      return undefined;
+    }
+
+    const scrollableParent = this.refs.root && getFirstScrollableParent(this.refs.root);
+    return scrollableParent
+      ? scrollableParent.clientHeight
+      : window.innerHeight;
+  }
+
+  private _moveFocusGap(gap: number): boolean {
+    if (!gap) {
+      return false;
+    }
+
+    const activeRectVerticalCenter = Math.floor(getVerticalCenter(this._activeElement.getBoundingClientRect()));
+    const desiredVerticalCenter = activeRectVerticalCenter + gap;
+    const leftAlignment = this._focusAlignment.left;
+
+    if (this._moveFocus(gap > 0, (activeRect: ClientRect, targetRect: ClientRect) => {
+      let distance = -1;
+      const targetRectVerticalCenter = Math.floor(getVerticalCenter(targetRect));
+
+      if (sign(targetRectVerticalCenter - activeRectVerticalCenter) === sign(gap)) {
+        distance = Math.abs(desiredVerticalCenter - targetRectVerticalCenter);
+
+        if (!containsX(targetRect, leftAlignment)) {
+          distance += Math.abs(getHorizontalCenter(targetRect) - leftAlignment);
+        }
+      }
+
+      return distance;
+    }, false)) {
       this._setFocusAlignment(this._activeElement, false, true);
       return true;
     }
@@ -637,5 +698,41 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
 
     return true;
   }
+}
 
+function getFirstScrollableParent(element?: HTMLElement): HTMLElement {
+  let parent = getParent(element);
+
+  while (parent && parent !== document.body) {
+    const overflow = window.getComputedStyle(parent)['overflow-y'];
+    if (overflow === 'auto' || overflow === 'scroll') {
+      return parent;
+    }
+
+    parent = getParent(parent);
+  }
+}
+
+function getHorizontalCenter(rect: ClientRect): number {
+  return getCenter(rect.left, rect.width);
+}
+
+function getVerticalCenter(rect: ClientRect): number {
+  return getCenter(rect.top, rect.height);
+}
+
+function getCenter(start: number, length: number): number {
+  return start + length / 2;
+}
+
+function containsX(rect: ClientRect, x: number): boolean {
+  return x >= rect.left && x <= (rect.left + rect.width);
+}
+
+function sign(n: number): number {
+  return n === 0
+    ? 0
+    : n < 0
+      ? -1
+      : 1;
 }
