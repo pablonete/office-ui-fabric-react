@@ -164,9 +164,12 @@ export class BaseButton extends BaseComponent<IBaseButtonProps, IBaseButtonState
         'aria-labelledby': ariaLabelledBy,
         'aria-describedby': ariaDescribedBy,
         'data-is-focusable': ((this.props as any)['data-is-focusable'] === false || disabled) ? false : true,
-        'aria-pressed': checked
       }
     );
+
+    if (checked !== undefined) {
+      buttonProps['aria-pressed'] = Boolean(checked);
+    }
 
     if (ariaHidden) {
       buttonProps['aria-hidden'] = true;
