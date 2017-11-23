@@ -2,10 +2,9 @@
 import * as React from 'react';
 import { ISplitterProps } from './Splitter.types';
 import { css, BaseComponent, autobind } from '../../Utilities';
-// import * as SplitterStylesModule from './Splitter.scss';
-
-// tslint:disable-next-line:no-any
-// const SplitterStyles: any = SplitterStylesModule;
+import { IconButton } from 'office-ui-fabric-react/lib/Button';
+import { ISplitterClassNames, getSplitterClassNames } from './Splitter.classNames';
+import { getStyles } from './Splitter.styles';
 
 export interface ISplitterState {
   isDragging?: boolean;
@@ -21,6 +20,8 @@ const defaultInitialWidth = 300;
  * A splitter component that renders 2 panes with a draggable border.
  */
 export class Splitter extends BaseComponent<ISplitterProps, ISplitterState> {
+  private _classNames: ISplitterClassNames;
+
   // tslint:disable-next-line:no-any
   constructor(props: ISplitterProps, context: any) {
     super(props, context);
@@ -46,21 +47,33 @@ export class Splitter extends BaseComponent<ISplitterProps, ISplitterState> {
       return <h1>A SplitterView must contain exactly 2 child elements.</h1>;
     }
 
+    const {
+      className,
+      fixedPaneClassName,
+      mainPaneClassName,
+      isVertical,
+      styles: customStyles,
+      theme,
+    } = this.props;
+
+    const styles = getStyles(theme, customStyles);
+    this._classNames = getSplitterClassNames(
+      styles,
+      className,
+      fixedPaneClassName,
+      mainPaneClassName,
+      this.state.isCollapsed,
+      isVertical);
+
     const [leftContent, rightContent] = React.Children.toArray(this.props.children);
 
     const actualWidth = this.state.isCollapsed ? collapsedWidth : this.state.leftPaneWidth;
-    const mainClassName = css('splitter', 'horizontal', 'toggle-button-enabled', this.state.isCollapsed && 'collapsed');
-
-    const toggleButtonSpanClassName =
-      this.state.isCollapsed
-        ? 'icon-toggle-button-horizontal-collapsed icon'
-        : 'icon-toggle-button-horizontal-expanded icon';
 
     return (
-      <div className={ css(mainClassName, this.props.className) }>
+      <div className={ this._classNames.root }>
         <div
-          className={ css('leftPane', 'hotkey-section', 'hotkey-section-0', this.props.fixedPaneClassName) }
-          key='leftPane'
+          className={ this._classNames.fixedPane }
+          key='fixedPane'
           style={ { width: this.state.leftPaneWidth } }>
           { leftContent }
         </div>
@@ -70,19 +83,17 @@ export class Splitter extends BaseComponent<ISplitterProps, ISplitterState> {
           </div>
           <div className='handleBar-hitTarget' key='hit'></div>
         </div>
-        <a
-          className='toggle-button'
-          href='#'
-          title='Collapse'
-          aria-expanded='true'
-          style={ { left: actualWidth - 18 } }
+        <IconButton
+          // className='toggle-button'
+          iconProps={ { iconName: 'ChevronDown' } }
+          aria-expanded={ !this.state.isCollapsed }
           onClick={ this._toggleCollapse }
-        >
-          <span className={ toggleButtonSpanClassName } />
-        </a>
+          style={ { left: actualWidth - 18 } }
+          title='Collapse'
+        />
         <div
-          className={ css('rightPane', 'hotkey-section', 'hotkey-section-1', this.props.mainPaneClassName) }
-          key='rightPane'
+          className={ this._classNames.mainPane }
+          key='mainPane'
           style={ { left: actualWidth } }>
           { rightContent }
         </div>
