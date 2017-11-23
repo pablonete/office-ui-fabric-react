@@ -35,6 +35,12 @@ export const AppDefinition: IAppDefinition = {
           url: '#/examples/layoutgroup'
         },
         {
+          component: require<any>('../components/Splitter/SplitterPage').SplitterPage,
+          key: 'Splitter',
+          name: 'Splitter',
+          url: '#/examples/splitter'
+        },
+        {
           component: require<any>('../components/Tile/TilePage').TilePage,
           key: 'Tile',
           name: 'Tile',
