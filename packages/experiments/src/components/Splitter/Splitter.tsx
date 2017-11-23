@@ -5,6 +5,7 @@ import { css, BaseComponent, autobind } from '../../Utilities';
 import { IconButton } from 'office-ui-fabric-react/lib/Button';
 import { ISplitterClassNames, getSplitterClassNames } from './Splitter.classNames';
 import { getStyles } from './Splitter.styles';
+import { Label } from '../../../../office-ui-fabric-react/lib/Label';
 
 export interface ISplitterState {
   isDragging?: boolean;
@@ -52,9 +53,14 @@ export class Splitter extends BaseComponent<ISplitterProps, ISplitterState> {
       fixedPaneClassName,
       mainPaneClassName,
       isVertical,
+      collapsedLabel,
       styles: customStyles,
       theme,
     } = this.props;
+
+    const {
+      isCollapsed
+    } = this.state;
 
     const styles = getStyles(theme, customStyles);
     this._classNames = getSplitterClassNames(
@@ -62,33 +68,44 @@ export class Splitter extends BaseComponent<ISplitterProps, ISplitterState> {
       className,
       fixedPaneClassName,
       mainPaneClassName,
-      this.state.isCollapsed,
+      isCollapsed,
       isVertical);
 
     const [leftContent, rightContent] = React.Children.toArray(this.props.children);
 
-    const actualWidth = this.state.isCollapsed ? collapsedWidth : this.state.leftPaneWidth;
+    const actualWidth = isCollapsed ? collapsedWidth : this.state.leftPaneWidth;
 
     return (
       <div className={ this._classNames.root }>
-        <div
-          className={ this._classNames.fixedPane }
-          key='fixedPane'
-          style={ { width: this.state.leftPaneWidth } }>
-          { leftContent }
-        </div>
-        <div className='handleBar' key='handleBar' style={ { left: actualWidth } } onMouseDown={ this._onMouseDown }>
-          <div className='handlebar-label' key='label' title={ this.props.collapsedLabel } onClick={ this._toggleCollapse }>
-            <span className='handlebar-label-text'>{ this.props.collapsedLabel }</span>
+        {
+          !isCollapsed &&
+          <div
+            className={ this._classNames.fixedPane }
+            key='fixedPane'
+            style={ { width: this.state.leftPaneWidth } }
+          >
+            { leftContent }
           </div>
+        }
+        <div className={ this._classNames.handleBar } key='handleBar' style={ { left: actualWidth } } onMouseDown={ this._onMouseDown }>
+          {
+            isCollapsed &&
+            collapsedLabel &&
+            <Label
+              className={ this._classNames.collapsedLabel }
+              onClick={ this._toggleCollapse }
+            >
+              { collapsedLabel }
+            </Label>
+          }
           <div className='handleBar-hitTarget' key='hit'></div>
         </div>
         <IconButton
-          // className='toggle-button'
-          iconProps={ { iconName: 'ChevronDown' } }
+          className={ this._classNames.toggleButton }
+          iconProps={ { iconName: isCollapsed ? 'ChevronRight' : 'ChevronLeft' } }
           aria-expanded={ !this.state.isCollapsed }
           onClick={ this._toggleCollapse }
-          style={ { left: actualWidth - 18 } }
+          style={ { left: actualWidth - 32 } }
           title='Collapse'
         />
         <div

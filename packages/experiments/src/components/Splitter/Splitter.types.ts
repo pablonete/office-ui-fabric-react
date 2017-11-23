@@ -46,12 +46,32 @@ export interface ISplitterStyles {
   root?: IStyle;
 
   /**
-   * Style for the root element in the vertical split layout.
-   */
-  rootVertical?: IStyle;
-
-  /**
    * Style for the panes.
    */
   pane?: IStyle;
+
+  /**
+   * Style for the draggable bar that let user change pane sizes.
+   */
+  handleBar?: IStyle;
+
+  /**
+   * Style for the handle bar in horizontal layout.
+   */
+  handleBarHorizontal?: IStyle;
+
+  /**
+   * Style for the handle bar in vertical layout.
+   */
+  handleBarVertical?: IStyle;
+
+  /**
+   * Style for the label displayed when the fixed pane is collapsed.
+   */
+  collapsedLabel?: IStyle;
+
+  /**
+   * Style for the button that expands/collapses the fixed pane.
+   */
+  toggleButton?: IStyle;
 }

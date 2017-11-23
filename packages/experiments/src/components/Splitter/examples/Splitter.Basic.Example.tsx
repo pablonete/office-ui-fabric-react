@@ -8,7 +8,7 @@ export class SplitterBasicExample extends React.Component<{}, {}> {
     return (
       <div>
         <h3>Splitter</h3>
-        <Splitter>
+        <Splitter collapsedLabel='Label (click here to restore)'>
           <DefaultButton>Left</DefaultButton>
           <DefaultButton>Right</DefaultButton>
         </Splitter>

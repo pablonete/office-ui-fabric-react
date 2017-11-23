@@ -6,6 +6,9 @@ export interface ISplitterClassNames {
   root?: string;
   fixedPane?: string;
   mainPane?: string;
+  handleBar?: string;
+  collapsedLabel?: string;
+  toggleButton?: string;
 }
 
 export const getSplitterClassNames = memoizeFunction((
@@ -22,10 +25,7 @@ export const getSplitterClassNames = memoizeFunction((
       'ms-Splitter',
       styles.root,
       isVertical
-        ? [
-          'vertical',
-          styles.rootVertical,
-        ]
+        ? 'vertical'
         : 'horizontal',
       isCollapsed && 'collapsed',
     ),
@@ -38,6 +38,20 @@ export const getSplitterClassNames = memoizeFunction((
       'mainPane',
       mainPaneClassName,
       styles.pane,
-    )
+    ),
+    handleBar: mergeStyles(
+      'handleBar',
+      styles.handleBar,
+      isVertical
+        ? styles.handleBarVertical
+        : styles.handleBarHorizontal,
+    ),
+    collapsedLabel: mergeStyles(
+      styles.collapsedLabel,
+    ),
+    toggleButton: mergeStyles(
+      'toggle-button',
+      styles.toggleButton,
+    ),
   };
 });
