@@ -449,13 +449,11 @@ export class BaseButton extends BaseComponent<IBaseButtonProps, IBaseButtonState
 
     return (
       <div
-        role={ 'button' }
-        aria-labelledby={ buttonProps.ariaLabel }
+        role={ 'combobox' }
         aria-disabled={ disabled }
         aria-haspopup={ true }
         aria-expanded={ this._isExpanded }
         aria-pressed={ this.props.checked }
-        aria-describedby={ buttonProps.ariaDescription }
         className={ classNames && classNames.splitButtonContainer }
         onKeyDown={ this._onSplitButtonContainerKeyDown }
         ref={ this._splitButtonContainer }
