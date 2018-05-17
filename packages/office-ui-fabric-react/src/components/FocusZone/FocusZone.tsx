@@ -213,14 +213,13 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
     const { onActiveElementChanged, doNotAllowFocusEventToPropagate } = this.props;
 
     if (this._isImmediateDescendantOfZone(ev.target as HTMLElement)) {
-      this._activeElement = ev.target as HTMLElement;
-      this._setFocusAlignment(this._activeElement);
+      this._setActiveElement(ev.target as HTMLElement, true);
     } else {
       let parentElement = ev.target as HTMLElement;
 
       while (parentElement && parentElement !== this._root.current) {
         if (isElementTabbable(parentElement) && this._isImmediateDescendantOfZone(parentElement)) {
-          this._activeElement = parentElement;
+          this._setActiveElement(parentElement);
           break;
         }
         parentElement = getParent(parentElement, ALLOW_VIRTUAL_ELEMENTS) as HTMLElement;
@@ -274,7 +273,7 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
     }
   }
 
-  private _setActiveElement(element: HTMLElement, forceAlignemnt?: boolean): void {
+  private _setActiveElement(element: HTMLElement, forceAlignment?: boolean): void {
     const previousActiveElement = this._activeElement;
 
     this._activeElement = element;
@@ -288,7 +287,7 @@ export class FocusZone extends BaseComponent<IFocusZoneProps, {}> implements IFo
     }
 
     if (this._activeElement) {
-      if (!this._focusAlignment || forceAlignemnt) {
+      if (!this._focusAlignment || forceAlignment) {
         this._setFocusAlignment(element, true, true);
       }
 
